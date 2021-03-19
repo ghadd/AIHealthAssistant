@@ -1,7 +1,18 @@
-from peewee import *
-from .config import *
+import os
 
-db = MySQLDatabase(DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT)
+from peewee import *
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv(), verbose=True)
+
+db = MySQLDatabase(
+    os.getenv("DB_NAME"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASS"),
+    host=os.getenv("DB_HOST"),
+    port=int(os.getenv("DB_PORT"))
+)
+
 
 class BaseModel(Model):
     class Meta:

@@ -2,14 +2,17 @@ from peewee import *
 
 from .base import BaseModel
 
-class User(BaseModel):
 
-    user_id = IntegerField(unique=True, primary_key=True, null=False, index=True)
+class User(BaseModel):
+    __tablename__ = "users"
+
+    user_id = IntegerField(unique=True, primary_key=True,
+                           null=False, index=True)
     name = CharField()
-    age = IntegerField(constraints=[Check('price > 0')], null=False)
+    age = IntegerField()
     city = CharField()
     address = CharField()
-    state = IntegerField(default=0, null=False)
+    state = IntegerField(default=0)
 
     @staticmethod
     def _set_property(tg_user, prop_name, property_value):
