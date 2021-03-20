@@ -7,13 +7,14 @@ from dotenv import load_dotenv, find_dotenv
 from functools import partial
 
 from state import State
-from utils import Loader, Validator, NotValidatedError, BOUNDED
+from utils import Loader, Validator, Connector, NotValidatedError, BOUNDED
 
 from database import User
 
 load_dotenv(find_dotenv(), verbose=True)
 
 bot = TeleBot(os.getenv("BOT_TOKEN"))
+# temporary solution for multilingual support
 locale = os.getenv("LOCALE")
 
 responses = Loader.load_responses()
@@ -89,3 +90,17 @@ def handle_help_symptoms(cb):
     bot.delete_message(cb.from_user.id, cb.message.message_id)
 
     User.update_state(cb.from_user, State.SYMPTOMS_INPUT)
+
+
+@bot.message_handler(func=lambda msg: User.get_state(msg.from_user) == State.SYMPTOMS_INPUT)
+def handle_symptoms_input(msg):
+    response = Connector.get_dicease_overview(msg.text, locale)
+
+    bot.send_message(
+        msg.from_user.id,
+        response,
+        parse_mode="Markdown"
+    )
+    handle_start(msg)
+
+    User.update_state(msg.from_user, State.NEUTRAL)
