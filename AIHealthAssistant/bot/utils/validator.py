@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List
 
 
 class NotValidatedError(Exception):
@@ -12,6 +12,10 @@ class NotValidatedError(Exception):
 
 # Some default validating funcs
 def MORE_THAN_ZERO(x): return x > 0
+
+
+def BOUNDED(x, min_value: float,
+            max_value: float): return min_value < x < max_value
 
 
 class Validator:

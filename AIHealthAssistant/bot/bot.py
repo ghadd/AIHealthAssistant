@@ -3,9 +3,10 @@ import os
 from telebot import TeleBot
 from telebot import types
 from dotenv import load_dotenv, find_dotenv
+from functools import partial
 
 from state import State
-from utils import Loader
+from utils import Loader, Validator, NotValidatedError, BOUNDED
 
 from database import User
 
@@ -19,25 +20,59 @@ responses = Loader.load_responses()
 
 @bot.message_handler(commands=['start'])
 def handle_start(msg: types.Message):
-    bot.send_message(
-        msg.from_user.id,
-        responses['start'][locale]
-    )
-    User.create(
-        user_id=msg.from_user.id,
-        state=State.NAME_INPUT
-    )
+    if not User.exists(msg.from_user):
+        bot.send_message(
+            msg.from_user.id,
+            responses['start'][locale]
+        )
+
+        User.create(
+            user_id=msg.from_user.id,
+            state=State.NAME_INPUT
+        )
+    else:
+        bot.send_message(
+            msg.from_user.id,
+            responses['known_user'][locale].format(
+                User.get_name(msg.from_user)),
+            reply_markup=Loader.load_markup("main_menu", locale)
+        )
 
 
-@bot.message_handler(func=lambda msg: User.get_state(msg.from_user))
+@bot.message_handler(func=lambda msg: User.get_state(msg.from_user) == State.NAME_INPUT)
 def handle_name_input(msg: types.Message):
     new_name = msg.text
     User.update_name(msg.from_user, new_name)
 
     bot.send_message(
         msg.from_user.id,
-        responses['welcome'][locale].format(new_name),
+        responses['welcome1'][locale].format(new_name),
         parse_mode='Markdown'
     )
 
-    User.update_state(msg.from_user, State.NEUTRAL)
+    User.update_state(msg.from_user, State.AGE_INPUT)
+
+
+@bot.message_handler(func=lambda msg: User.get_state(msg.from_user) == State.AGE_INPUT)
+def handle_age_input(msg: types.Message):
+    reply_markup = None
+
+    try:
+        new_age = Validator.validate_and_cast_numeric(
+            msg.text,
+            wanted_type=int,
+            constraints=[partial(BOUNDED, min_value=1, max_value=120)]
+        )
+        response = responses['welcome2'][locale]
+        User.update_state(msg.from_user, State.NEUTRAL)
+        User.update_age(msg.from_user, new_age)
+        reply_markup = Loader.load_markup("main_menu", locale)
+
+    except NotValidatedError:
+        response = responses['error']['name_validation'][locale]
+
+    bot.send_message(
+        msg.from_user.id,
+        response,
+        reply_markup=reply_markup
+    )
