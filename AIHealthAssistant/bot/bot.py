@@ -9,7 +9,7 @@ from functools import partial
 from state import State
 from utils import Loader, Validator, Connector, NotValidatedError, BOUNDED
 
-from database import User
+from database import User, Record
 
 load_dotenv(find_dotenv(), verbose=True)
 
@@ -94,7 +94,7 @@ def handle_help_symptoms(cb):
 
 @bot.message_handler(func=lambda msg: User.get_state(msg.from_user) == State.SYMPTOMS_INPUT)
 def handle_symptoms_input(msg):
-    response = Connector.get_dicease_overview(msg.text, locale)
+    response_args, response = Connector.get_dicease_overview(msg.text, locale)
 
     bot.send_message(
         msg.from_user.id,
@@ -104,3 +104,11 @@ def handle_symptoms_input(msg):
     handle_start(msg)
 
     User.update_state(msg.from_user, State.NEUTRAL)
+    record = Record.create(
+        id=123,
+        symptoms=response_args["symptoms"],
+        diagnosis=response_args["diagnosis"],
+        required_analyzes=response_args["analysis"],
+        doctor=response_args["doctor"]
+    )
+    User.update_last_record(msg.from_user, record)

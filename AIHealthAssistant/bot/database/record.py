@@ -1,6 +1,7 @@
 from peewee import *
+from playhouse.mysql_ext import JSONField
 
-from base import BaseModel
+from .base import BaseModel
 import datetime
 
 
@@ -8,11 +9,11 @@ class Record(BaseModel):
     __tablename__ = "records"
 
     record_id = IntegerField(unique=True, primary_key=True,
-                           null=False, index=True)
-    symptoms = TextField()
+                             null=False, index=True)
+    symptoms = JSONField()
     date_create = DateTimeField(default=datetime.datetime.now)
     diagnosis = CharField()
-    required_analizes = CharField()
+    required_analyzes = JSONField()
     doctor = CharField()
 
     # @staticmethod

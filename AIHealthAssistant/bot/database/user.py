@@ -1,7 +1,7 @@
 from peewee import *
 
-from base import BaseModel
-from record import Record
+from .base import BaseModel
+from .record import Record
 
 
 class User(BaseModel):

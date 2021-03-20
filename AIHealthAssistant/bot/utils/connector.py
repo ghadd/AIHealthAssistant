@@ -17,7 +17,13 @@ class Connector:
     @staticmethod
     def get_dicease_overview(users_description: str, locale: str):
         # connect from evalueated model
-        diagnosis, anals, doctor = "diag", ["med1", "med2"], "doc"
+        response_args = {
+            "symptoms": ["a", "b"],
+            "diagnosis": "diag",
+            "analysis": ["med1", "med2"],
+            "doctor": "doc"
+        }
+        _, diagnosis, anals, doctor = response_args.values()
 
         if diagnosis:
             response = responses['help_symptoms2'][locale].format(
@@ -28,4 +34,4 @@ class Connector:
         else:
             response = responses['error']['symptoms_validation'][locale]
 
-        return response
+        return response_args, response
