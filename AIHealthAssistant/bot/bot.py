@@ -1,4 +1,5 @@
 import os
+from threading import local
 
 from telebot import TeleBot
 from telebot import types
@@ -76,3 +77,15 @@ def handle_age_input(msg: types.Message):
         response,
         reply_markup=reply_markup
     )
+
+
+@bot.callback_query_handler(func=lambda cb: cb.data == "/help_symptoms")
+def handle_help_symptoms(cb):
+
+    bot.send_message(
+        cb.from_user.id,
+        responses['help_symptoms1'][locale]
+    )
+    bot.delete_message(cb.from_user.id, cb.message.message_id)
+
+    User.update_state(cb.from_user, State.SYMPTOMS_INPUT)
