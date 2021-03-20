@@ -7,7 +7,7 @@ from dotenv import load_dotenv, find_dotenv
 from functools import partial
 
 from state import State
-from utils import Loader, Validator, Connector, NotValidatedError, BOUNDED
+from utils import Loader, Validator, Connector, NotValidatedError, BOUNDED, TEXT_ONLY
 
 from database import User, Record
 
@@ -41,18 +41,39 @@ def handle_start(msg: types.Message):
         )
 
 
+@bot.callback_query_handler(func=lambda cb: cb.data == "/update_user_data")
+def handle_help_symptoms(cb):
+    bot.send_message(
+        cb.from_user.id,
+        responses['update_user_data'][locale]
+    )
+
+    User.update_state(
+        cb.from_user, 
+        State.NAME_INPUT
+    )
+
 @bot.message_handler(func=lambda msg: User.get_state(msg.from_user) == State.NAME_INPUT)
 def handle_name_input(msg: types.Message):
-    new_name = msg.text
-    User.update_name(msg.from_user, new_name)
+    try:
+        new_name = Validator.validate_and_cast_string(
+            msg.text,
+            wanted_type=str,
+            constraints=[partial(TEXT_ONLY)]
+        )
+        response = responses['welcome1'][locale]
+        User.update_state(msg.from_user, State.AGE_INPUT)
+        User.update_name(msg.from_user, new_name)
+
+    except NotValidatedError:
+        response = responses['error']['name_validation'][locale]
+
 
     bot.send_message(
         msg.from_user.id,
-        responses['welcome1'][locale].format(new_name),
+        response,
         parse_mode='Markdown'
     )
-
-    User.update_state(msg.from_user, State.AGE_INPUT)
 
 
 @bot.message_handler(func=lambda msg: User.get_state(msg.from_user) == State.AGE_INPUT)
