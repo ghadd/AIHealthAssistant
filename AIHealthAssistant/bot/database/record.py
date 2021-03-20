@@ -1,6 +1,6 @@
 from peewee import *
 
-from .base import BaseModel
+from base import BaseModel
 import datetime
 
 
