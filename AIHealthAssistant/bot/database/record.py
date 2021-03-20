@@ -1,5 +1,6 @@
 from peewee import *
 from .base import BaseModel
+
 from playhouse.mysql_ext import JSONField
 import datetime
 

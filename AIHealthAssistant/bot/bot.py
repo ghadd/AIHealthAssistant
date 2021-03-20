@@ -57,8 +57,6 @@ def handle_name_input(msg: types.Message):
 
 @bot.message_handler(func=lambda msg: User.get_state(msg.from_user) == State.AGE_INPUT)
 def handle_age_input(msg: types.Message):
-    reply_markup = None
-
     try:
         new_age = Validator.validate_and_cast_numeric(
             msg.text,
@@ -66,19 +64,33 @@ def handle_age_input(msg: types.Message):
             constraints=[partial(BOUNDED, min_value=1, max_value=120)]
         )
         response = responses['welcome2'][locale]
-        User.update_state(msg.from_user, State.NEUTRAL)
+        User.update_state(msg.from_user, State.ADDRESS_INPUT)
         User.update_age(msg.from_user, new_age)
-        reply_markup = Loader.load_markup("main_menu", locale)
 
     except NotValidatedError:
-        response = responses['error']['name_validation'][locale]
+        response = responses['error']['age_validation'][locale]
 
     bot.send_message(
         msg.from_user.id,
-        response,
+        response
+    )
+
+
+@bot.message_handler(func=lambda msg: User.get_state(msg.from_user) == State.ADDRESS_INPUT)
+def handle_address_input(msg: types.Message):
+    new_address = msg.text
+    User.update_address(msg.from_user, new_address)
+
+    reply_markup = Loader.load_markup("main_menu", locale)
+
+    bot.send_message(
+        msg.from_user.id,
+        responses['welcome3'][locale],
+        parse_mode='Markdown',
         reply_markup=reply_markup
     )
 
+    User.update_state(msg.from_user, State.NEUTRAL)
 
 @bot.callback_query_handler(func=lambda cb: cb.data == "/help_symptoms")
 def handle_help_symptoms(cb):
