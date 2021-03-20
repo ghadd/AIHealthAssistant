@@ -1,6 +1,7 @@
 from peewee import *
 
 from .base import BaseModel
+from .record import Record
 
 
 class User(BaseModel):
@@ -10,9 +11,9 @@ class User(BaseModel):
                            null=False, index=True)
     name = CharField()
     age = IntegerField()
-    city = CharField()
     address = CharField()
     state = IntegerField(default=0)
+    last_record = ForeignKeyField(Record, backref='users')
 
     @staticmethod
     def _set_property(tg_user, prop_name, property_value):
@@ -54,6 +55,22 @@ class User(BaseModel):
     @staticmethod
     def get_age(tg_user):
         return User._get_property(tg_user, "age")
+
+    @staticmethod
+    def update_address(tg_user, new_address):
+        User._set_property(tg_user, "address", new_address)
+
+    @staticmethod
+    def get_address(tg_user):
+        return User._get_property(tg_user, "address")
+
+    @staticmethod
+    def update_last_record(tg_user, new_record):
+        User._set_property(tg_user, "last_record", new_record)
+
+    @staticmethod
+    def get_last_record(tg_user):
+        return User._get_property(tg_user, "last_record")
 
     @staticmethod
     def exists(tg_user) -> bool:
