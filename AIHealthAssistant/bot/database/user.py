@@ -13,7 +13,7 @@ class User(BaseModel):
     age = IntegerField()
     address = CharField()
     state = IntegerField(default=0)
-    last_record = ForeignKeyField(Record, backref='users')
+    last_record = ForeignKeyField(Record, backref='users', null=True)
 
     @staticmethod
     def _set_property(tg_user, prop_name, property_value):
