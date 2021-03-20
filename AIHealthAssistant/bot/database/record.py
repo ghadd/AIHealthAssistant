@@ -8,7 +8,7 @@ class Record(BaseModel):
     __tablename__ = "records"
 
     record_id = IntegerField(unique=True, primary_key=True,
-                           null=False, index=True)
+                           null=False, index=True, constraints=[SQL('AUTO_INCREMENT')])
     symptoms = TextField()
     date_create = DateTimeField(default=datetime.datetime.now)
     diagnosis = CharField()
