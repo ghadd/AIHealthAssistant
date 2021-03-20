@@ -105,7 +105,6 @@ def handle_symptoms_input(msg):
 
     User.update_state(msg.from_user, State.NEUTRAL)
     record = Record.create(
-        id=123,
         symptoms=response_args["symptoms"],
         diagnosis=response_args["diagnosis"],
         required_analyzes=response_args["analysis"],
