@@ -49,9 +49,10 @@ def handle_help_symptoms(cb):
     )
 
     User.update_state(
-        cb.from_user, 
+        cb.from_user,
         State.NAME_INPUT
     )
+
 
 @bot.message_handler(func=lambda msg: User.get_state(msg.from_user) == State.NAME_INPUT)
 def handle_name_input(msg: types.Message):
@@ -61,13 +62,12 @@ def handle_name_input(msg: types.Message):
             wanted_type=str,
             constraints=[partial(TEXT_ONLY)]
         )
-        response = responses['welcome1'][locale]
+        response = responses['welcome1'][locale].format(new_name)
         User.update_state(msg.from_user, State.AGE_INPUT)
         User.update_name(msg.from_user, new_name)
 
     except NotValidatedError:
         response = responses['error']['name_validation'][locale]
-
 
     bot.send_message(
         msg.from_user.id,
@@ -112,6 +112,7 @@ def handle_address_input(msg: types.Message):
     )
 
     User.update_state(msg.from_user, State.NEUTRAL)
+
 
 @bot.callback_query_handler(func=lambda cb: cb.data == "/help_symptoms")
 def handle_help_symptoms(cb):
